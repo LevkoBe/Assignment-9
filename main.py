@@ -12,8 +12,8 @@ rated_shows = titles.loc[not_na & (titles["type"] == "SHOW"), "imdb_score"]
 print(rated_movies, rated_shows, sep="\n")
 
 plt.subplot(1, 2, 1)
-plt.hist(rated_movies, bins=np.arange(min(rated_movies), max(rated_movies), 0.2))
+plt.hist(rated_movies, bins=np.arange(min(rated_movies), max(rated_movies) + 0.2, 0.2))
 
 plt.subplot(1, 2, 2)
-plt.hist(rated_shows, bins=np.arange(min(rated_shows), max(rated_shows), 0.2))
+plt.hist(rated_shows, bins=np.arange(min(rated_shows), max(rated_shows) + 0.2, 0.2))
 plt.show()
