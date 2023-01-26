@@ -11,6 +11,8 @@ titles = pd.read_csv("titles.csv")
 rated_movies = titles[titles["type"] == "MOVIE"]["imdb_score"].dropna()
 rated_shows = titles[titles["type"] == "SHOW"]["imdb_score"].dropna()
 
+plt.figure(figsize=(13, 8))
+
 plt.subplot(2, 2, 1)
 sns.histplot(titles, x="imdb_score", bins=np.arange(0, 10.2, 0.2), hue="type")
 plt.xlabel("Score")
@@ -26,20 +28,20 @@ labels, values = np.unique(age_certifications, return_counts=True)
 plt.pie(values, labels=labels)
 
 # fourth part
-
-double_table = pd.merge(titles.sort_values(by="imdb_score", ascending=False).head(1000),
-                        credits_frame[credits_frame['role'] == "ACTOR"], how="inner", on=["id"])
+top_1000 = titles.sort_values(by="imdb_score", ascending=False).head(1000)
+double_table = pd.merge(top_1000, credits_frame[credits_frame['role'] == "ACTOR"], how="inner", on=["id"])
 actor_rating = double_table.groupby(by="name")['title'].count().sort_values(ascending=False).head(10)
 
-print(titles.groupby(by=["type"])["imdb_score"].mean(), double_table, actor_rating, sep="\n")
+print(titles.groupby(by=["type"])["imdb_score"].mean())
 
-#five part
+# fifth part
 
-genres_for_movie = titles[titles['type'] == 'MOVIE'].sort_values(by="imdb_score", ascending=False).head(1000)
-genres_for_show = titles[titles['type'] == 'SHOW'].sort_values(by="imdb_score", ascending=False).head(1000)
-all_genres_for_movie = [x.strip('[]').split(',') for x in genres_for_movie['genres']]
-all_genres_for_show = [x.strip('[]').split(',') for x in genres_for_show['genres']]
-
+genres_for_movie = top_1000[top_1000['type'] == 'MOVIE']
+genres_for_show = top_1000[top_1000['type'] == 'SHOW']
+list_of_chars = ['[', ']', "'", ' ']
+translation_table = str.maketrans('', '', ''.join(list_of_chars))
+all_genres_for_movie = [x.translate(translation_table).split(',') for x in genres_for_movie['genres']]
+all_genres_for_show = [x.translate(translation_table).split(',') for x in genres_for_show['genres']]
 movie_genres = {}
 show_genres = {}
 
@@ -56,17 +58,18 @@ for current_list in all_genres_for_show:
             show_genres[genre] = 0 
         show_genres[genre] += 1
 
-
+# .to_frame()
+df1 = pd.DataFrame({'type': list(movie_genres.keys()), 'value': list(movie_genres.values())})
+df2 = pd.DataFrame({'type': list(show_genres.keys()), 'value': list(show_genres.values())})
+double_array = pd.merge(df1, df2, how="outer", on='type')
 
 plt.subplot(2, 2, 3)
-plt.bar(movie_genres.keys(), movie_genres.values())
+plt.barh(df1['type'], df1['value'])
+plt.xlabel("movie")
 
 plt.subplot(2, 2, 4)
-plt.bar(show_genres.keys(), show_genres.values())
-
-
-print(movie_genres) 
-print(show_genres) 
+plt.barh(df2['type'], df2['value'])
+plt.xlabel("show")
 
 
 plt.show()
